@@ -1,5 +1,9 @@
 const Car = require('./cars-model')
 
+// vin validator, from GOOGLE
+// https://www.npmjs.com/package/vin-validator
+const vin = require('vin-validator')
+
 const checkCarId = async (req, res, next) => {
   try {
     const car = await Car.getById(req.params.id)
@@ -43,21 +47,27 @@ const checkCarPayload = (req, res, next) => {
 }
 
 const checkVinNumberValid = (req, res, next) => {
-  
+  if(vin.validate(req.body.vin)) {
+    next()
+  } else {
+    next({
+      status: 400,
+      message: `vin ${req.params.vin} is invalid`
+    })
+  }
 }
 
 const checkVinNumberUnique = async (req, res, next) => {
   try {
-    const car = await Car.getById(req.params.id)
+    const existing = await Car.getByVin(req.body.vin)
 
-    if(!car) {
+    if(!existing) {
+      next()
+    } else {
       next({
         status: 404,
-        message: `car with id ${req.params.id} is not found`
+        message: `vin ${req.body.vin} already exists`
       })
-    } else {
-      req.car = car
-      next()
     }
   }
   catch(err) {
