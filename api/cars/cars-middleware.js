@@ -35,7 +35,6 @@ const checkCarPayload = (req, res, next) => {
   } else if(!req.body.mileage) {
     error.message = 'mileage is missing'
   } else {
-    res.json(req.body)
     next()
   }
 
